@@ -1,0 +1,13 @@
+# Não embutir .env na imagem — senão DB_HOST=127.0.0.1 sobrescreve o Railway
+.env
+.env.*
+!.env.example
+
+.git
+.gitignore
+node_modules
+vendor
+tests
+phpunit.xml
+.editorconfig
+*.md

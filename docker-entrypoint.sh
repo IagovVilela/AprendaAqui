@@ -3,6 +3,10 @@
 # Garante que variáveis de ambiente (Railway) prevaleçam sobre cache antigo
 php artisan config:clear 2>/dev/null || true
 
+# Diagnóstico (sem senhas): se MYSQLHOST e DATABASE_URL estiverem vazios, o Laravel cai em 127.0.0.1
+echo "DB: DB_CONNECTION=${DB_CONNECTION:-unset} MYSQLHOST=${MYSQLHOST:-unset} DB_HOST=${DB_HOST:-unset}"
+if [ -n "${DATABASE_URL:-}" ]; then echo "DB: DATABASE_URL=definida"; else echo "DB: DATABASE_URL=vazia"; fi
+
 # Opcional: SKIP_DB_MIGRATE=1 só para diagnóstico local (não use em produção)
 if [ "${SKIP_DB_MIGRATE:-0}" = "1" ]; then
   echo "SKIP_DB_MIGRATE=1 — pulando migrate (apenas diagnóstico)."

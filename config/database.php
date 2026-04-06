@@ -45,13 +45,14 @@ return [
 
         'mysql' => [
             'driver' => 'mysql',
-            'url' => env('DATABASE_URL', env('MYSQL_URL', env('DB_URL'))),
-            // Railway: MYSQLHOST, MYSQLPORT, MYSQLDATABASE, MYSQLUSER, MYSQLPASSWORD (no serviço MySQL)
-            'host' => env('DB_HOST', env('MYSQLHOST', env('MYSQL_HOST', '127.0.0.1'))),
-            'port' => env('DB_PORT', env('MYSQLPORT', env('MYSQL_PORT', '3306'))),
-            'database' => env('DB_DATABASE', env('MYSQLDATABASE', env('MYSQL_DATABASE', 'laravel'))),
-            'username' => env('DB_USERNAME', env('MYSQLUSER', env('MYSQL_USER', 'root'))),
-            'password' => env('DB_PASSWORD', env('MYSQLPASSWORD', env('MYSQL_PASSWORD', ''))),
+            // String vazia no .env não deve bloquear MYSQL_URL (usa ?: em vez de env(..., default) encadeado)
+            'url' => env('DATABASE_URL') ?: env('MYSQL_URL') ?: env('DB_URL'),
+            // Railway: MYSQL* primeiro — se o .env tiver DB_HOST=127.0.0.1 na imagem, ainda assim o MySQL do Railway ganha
+            'host' => env('MYSQLHOST', env('MYSQL_HOST', env('DB_HOST', '127.0.0.1'))),
+            'port' => env('MYSQLPORT', env('MYSQL_PORT', env('DB_PORT', '3306'))),
+            'database' => env('MYSQLDATABASE', env('MYSQL_DATABASE', env('DB_DATABASE', 'laravel'))),
+            'username' => env('MYSQLUSER', env('MYSQL_USER', env('DB_USERNAME', 'root'))),
+            'password' => env('MYSQLPASSWORD', env('MYSQL_PASSWORD', env('DB_PASSWORD', ''))),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
@@ -66,12 +67,12 @@ return [
 
         'mariadb' => [
             'driver' => 'mariadb',
-            'url' => env('DATABASE_URL', env('MYSQL_URL', env('DB_URL'))),
-            'host' => env('DB_HOST', env('MYSQLHOST', env('MYSQL_HOST', '127.0.0.1'))),
-            'port' => env('DB_PORT', env('MYSQLPORT', env('MYSQL_PORT', '3306'))),
-            'database' => env('DB_DATABASE', env('MYSQLDATABASE', env('MYSQL_DATABASE', 'laravel'))),
-            'username' => env('DB_USERNAME', env('MYSQLUSER', env('MYSQL_USER', 'root'))),
-            'password' => env('DB_PASSWORD', env('MYSQLPASSWORD', env('MYSQL_PASSWORD', ''))),
+            'url' => env('DATABASE_URL') ?: env('MYSQL_URL') ?: env('DB_URL'),
+            'host' => env('MYSQLHOST', env('MYSQL_HOST', env('DB_HOST', '127.0.0.1'))),
+            'port' => env('MYSQLPORT', env('MYSQL_PORT', env('DB_PORT', '3306'))),
+            'database' => env('MYSQLDATABASE', env('MYSQL_DATABASE', env('DB_DATABASE', 'laravel'))),
+            'username' => env('MYSQLUSER', env('MYSQL_USER', env('DB_USERNAME', 'root'))),
+            'password' => env('MYSQLPASSWORD', env('MYSQL_PASSWORD', env('DB_PASSWORD', ''))),
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => env('DB_CHARSET', 'utf8mb4'),
             'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
