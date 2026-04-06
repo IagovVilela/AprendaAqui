@@ -45,8 +45,8 @@ return [
 
         'mysql' => [
             'driver' => 'mysql',
-            // String vazia no .env não deve bloquear MYSQL_URL (usa ?: em vez de env(..., default) encadeado)
-            'url' => env('DATABASE_URL') ?: env('MYSQL_URL') ?: env('DB_URL'),
+            // Railway costuma definir DB_URL com ${{MySQL.DATABASE_URL}} — prioridade explícita antes de DATABASE_URL
+            'url' => env('DB_URL') ?: env('DATABASE_URL') ?: env('MYSQL_URL'),
             // Railway: MYSQL* primeiro — se o .env tiver DB_HOST=127.0.0.1 na imagem, ainda assim o MySQL do Railway ganha
             'host' => env('MYSQLHOST', env('MYSQL_HOST', env('DB_HOST', '127.0.0.1'))),
             'port' => env('MYSQLPORT', env('MYSQL_PORT', env('DB_PORT', '3306'))),
@@ -67,7 +67,7 @@ return [
 
         'mariadb' => [
             'driver' => 'mariadb',
-            'url' => env('DATABASE_URL') ?: env('MYSQL_URL') ?: env('DB_URL'),
+            'url' => env('DB_URL') ?: env('DATABASE_URL') ?: env('MYSQL_URL'),
             'host' => env('MYSQLHOST', env('MYSQL_HOST', env('DB_HOST', '127.0.0.1'))),
             'port' => env('MYSQLPORT', env('MYSQL_PORT', env('DB_PORT', '3306'))),
             'database' => env('MYSQLDATABASE', env('MYSQL_DATABASE', env('DB_DATABASE', 'laravel'))),
