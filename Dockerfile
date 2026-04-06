@@ -33,8 +33,10 @@ RUN composer install --no-dev --optimize-autoloader
 # Install Node dependencies and build assets
 RUN npm install && npm run build
 
+RUN chmod +x /var/www/docker-entrypoint.sh \
+    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+
 # Expose port
 EXPOSE 8000
 
-# Start command
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+ENTRYPOINT ["/var/www/docker-entrypoint.sh"]
