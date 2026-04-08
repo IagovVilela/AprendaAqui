@@ -11,6 +11,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Railway (e outros proxies) terminam TLS; sem isso o Laravel acha HTTP e gera assets em http:// → Mixed Content
+        $middleware->trustProxies(at: '*');
         $middleware->alias([
             'admin' => \App\Http\Middleware\IsAdmin::class,
         ]);
