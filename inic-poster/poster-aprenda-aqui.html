@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aprenda Aqui — Pôster INIC</title>
+  <style>
+    @page {
+      size: 90cm 120cm;
+      margin: 0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #fff;
+      color: #111;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .poster {
+      width: 90cm;
+      min-height: 120cm;
+      margin: 0 auto;
+      padding: 1.2cm 1.4cm 1cm;
+      border: 2px solid #bdbdbd;
+      background: #fff;
+    }
+
+    /* Header */
+    .header-logos {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      align-items: center;
+      gap: 0.5cm;
+      margin-bottom: 0.6cm;
+    }
+
+    .logo-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.2cm;
+    }
+
+    .logo-fve {
+      font-size: 11pt;
+      font-weight: bold;
+      color: #1a3d6e;
+      text-align: center;
+      line-height: 1.25;
+    }
+
+    .logo-fve small {
+      display: block;
+      font-size: 8pt;
+      font-weight: normal;
+    }
+
+    .logo-center {
+      text-align: center;
+      font-size: 9pt;
+      font-weight: bold;
+      color: #1565c0;
+    }
+
+    .logo-center .gear {
+      font-size: 28pt;
+      line-height: 1;
+      display: block;
+      margin-bottom: 0.15cm;
+    }
+
+    .logo-univap {
+      text-align: center;
+    }
+
+    .logo-univap .word {
+      font-size: 32pt;
+      font-weight: 800;
+      letter-spacing: -1px;
+      color: #004080;
+      line-height: 1;
+    }
+
+    .logo-univap .word .u-accent {
+      color: #e31b23;
+    }
+
+    .logo-univap .sub {
+      font-size: 7.5pt;
+      font-weight: 600;
+      color: #004080;
+      letter-spacing: 0.5px;
+      margin-top: 0.1cm;
+    }
+
+    .title-block {
+      text-align: center;
+      margin: 0.5cm 0 0.35cm;
+    }
+
+    .title-block h1 {
+      font-size: 22pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      line-height: 1.2;
+      margin-bottom: 0.35cm;
+    }
+
+    .authors {
+      font-size: 13pt;
+      margin-bottom: 0.2cm;
+    }
+
+    .institution {
+      font-size: 10pt;
+      line-height: 1.35;
+    }
+
+    /* Sections */
+    h2 {
+      font-size: 12pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin: 0.45cm 0 0.2cm;
+    }
+
+    h2:first-of-type {
+      margin-top: 0.25cm;
+    }
+
+    p, li {
+      font-size: 10pt;
+      line-height: 1.35;
+      text-align: justify;
+    }
+
+    .resumo {
+      margin-bottom: 0.35cm;
+    }
+
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8cm;
+      align-items: start;
+    }
+
+    .col section {
+      margin-bottom: 0.15cm;
+    }
+
+    /* Screenshot placeholder */
+    .screenshot-placeholder {
+      width: 100%;
+      min-height: 7.5cm;
+      border: 2px dashed #9e9e9e;
+      background: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.4cm;
+      padding: 0.5cm;
+    }
+
+    .screenshot-placeholder span {
+      font-size: 11pt;
+      color: #616161;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .screenshot-placeholder small {
+      font-size: 9pt;
+      color: #757575;
+      margin-top: 0.2cm;
+      text-align: center;
+    }
+
+    /* Figure */
+    .figure-wrap {
+      margin-top: 0.35cm;
+    }
+
+    .figure-box {
+      border: 1px solid #ccc;
+      padding: 0.35cm;
+      background: #fafafa;
+    }
+
+    .flow-diagram {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .caption {
+      font-size: 9pt;
+      margin-top: 0.15cm;
+      text-align: left;
+    }
+
+    .caption .fonte {
+      font-size: 8pt;
+      font-style: italic;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+      margin: 0.2cm 0 0.35cm;
+    }
+
+    table caption {
+      caption-side: top;
+      text-align: left;
+      font-size: 9pt;
+      font-weight: bold;
+      margin-bottom: 0.15cm;
+    }
+
+    th, td {
+      border: 1px solid #333;
+      padding: 0.12cm 0.2cm;
+      text-align: left;
+    }
+
+    th {
+      background: #e3f2fd;
+      font-weight: bold;
+    }
+
+    .refs {
+      font-size: 8pt;
+      line-height: 1.3;
+      text-align: left;
+      list-style: none;
+    }
+
+    .refs li {
+      margin-bottom: 0.12cm;
+      text-align: left;
+    }
+
+    ul.methods {
+      margin-left: 0.5cm;
+      font-size: 10pt;
+    }
+
+    ul.methods li {
+      margin-bottom: 0.1cm;
+      text-align: justify;
+    }
+  </style>
+</head>
+<body>
+  <article class="poster">
+    <header>
+      <div class="header-logos">
+        <div class="logo-box">
+          <div class="logo-fve">
+            FVE
+            <small>FUNDAÇÃO VALEPARAIBANA<br />DE ENSINO</small>
+          </div>
+        </div>
+        <div class="logo-box">
+          <div class="logo-center">
+            <span class="gear" aria-hidden="true">⚙</span>
+            ENGENHARIA DA<br />COMPUTAÇÃO — FEAU
+          </div>
+        </div>
+        <div class="logo-box">
+          <div class="logo-univap">
+            <div class="word"><span class="u-accent">u</span>nivap</div>
+            <div class="sub">UNIVERSIDADE DO VALE DO PARAÍBA</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="title-block">
+        <h1>Aprenda Aqui: uma plataforma gamificada para ensino de programação</h1>
+        <p class="authors">Iago Vilela Ventura; Mateus Ribeiro Bittencourt</p>
+        <p class="institution">
+          Faculdade de Engenharia, Arquitetura e Urbanismo — UNIVAP<br />
+          Curso de Engenharia da Computação — São José dos Campos — SP
+        </p>
+      </div>
+    </header>
+
+    <section class="resumo">
+      <h2>Resumo</h2>
+      <p>
+        O ensino de programação no ensino básico e técnico enfrenta desafios de engajamento, evasão e dificuldade
+        na consolidação de conceitos abstratos. Este trabalho apresenta o <strong>Aprenda Aqui</strong>, plataforma web
+        gamificada para aprendizagem de lógica e programação, desenvolvida com <strong>Next.js</strong> e banco de dados
+        <strong>PostgreSQL</strong>, hospedada em ambiente de produção na nuvem. A solução organiza trilhas de estudo
+        (HTML, CSS, JavaScript e Python), lições curtas, sistema de experiência (XP), níveis, ofensivas diárias e ranking,
+        visando aumentar motivação e persistência no estudo. Foi conduzido um <strong>teste piloto</strong> junto à
+        <strong>Escola Marilda</strong>, com observação de uso e coleta de percepções de estudantes e mediadores.
+        Os resultados preliminares indicam maior interesse nas atividades e facilidade de navegação na interface.
+        Conclui-se que a gamificação integrada a uma arquitetura web moderna é promissora para apoiar o ensino de
+        programação em contextos escolares, servindo de base para avaliações quantitativas em ciclos futuros do projeto.
+      </p>
+    </section>
+
+    <div class="columns">
+      <div class="col col-left">
+        <section>
+          <h2>Introdução</h2>
+          <p>
+            A literatura em Educação em Computação aponta que disciplinas introdutórias de programação apresentam altas
+            taxas de dificuldade e desmotivação, especialmente quando o ensino se limita a exercícios repetitivos sem
+            feedback imediato. Estratégias de gamificação — pontos, níveis, desafios e competição saudável — têm sido
+            associadas ao aumento de engajamento e tempo de prática deliberada.
+          </p>
+          <p>
+            Nesse contexto, o projeto <em>Aprenda Aqui</em> (https://aprendaaqui.up.railway.app/) propõe um ambiente
+            digital acessível via navegador, voltado a estudantes em formação inicial em tecnologia, com narrativa de
+            “jornada” e recompensas progressivas. O objetivo geral é oferecer uma ferramenta institucional apoiada pela
+            UNIVAP/FEAU para experimentação pedagógica em programação, alinhada às demandas do mercado e à inclusão digital.
+          </p>
+        </section>
+
+        <section>
+          <h2>Material e Métodos</h2>
+          <p>
+            O desenvolvimento seguiu ciclo iterativo de prototipagem: levantamento de requisitos com professores,
+            modelagem de domínio (usuários, trilhas, módulos, lições e progresso), implementação full-stack e deploy
+            contínuo. A stack de produção compreende framework <strong>Next.js</strong> (interface reativa e rotas
+            otimizadas), API de serviços e persistência relacional em <strong>PostgreSQL</strong>, com hospedagem na
+            plataforma Railway.
+          </p>
+          <ul class="methods">
+            <li><strong>Gamificação:</strong> XP por lição concluída, barra de progresso, ofensiva diária e ranking global.</li>
+            <li><strong>Conteúdo:</strong> trilhas estruturadas por linguagem, com lições curtas e interativas.</li>
+            <li><strong>Piloto:</strong> aplicação supervisionada na Escola Marilda, com sessões de uso guiado e registro de observações.</li>
+            <li><strong>Análise:</strong> síntese qualitativa de engajamento, usabilidade e percepções; tabela de indicadores para consolidação dos dados do piloto.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Resultados</h2>
+          <p>
+            A plataforma encontra-se operacional em ambiente público, com cadastro de usuários, dashboard de progresso
+            e múltiplas trilhas de aprendizagem. No teste piloto na Escola Marilda, os participantes conseguiram concluir
+            lições iniciais sem assistência técnica constante, relatando que os elementos visuais de XP e ranking
+            incentivaram a continuidade. A interface responsiva permitiu uso em laboratório de informática com navegadores
+            convencionais.
+          </p>
+          <p>
+            Como entrega técnica, a arquitetura cliente-servidor com PostgreSQL garante integridade dos registros de
+            progresso e escalabilidade para novas turmas. A Figura 1 resume o fluxo pedagógico-técnico da solução.
+          </p>
+        </section>
+
+        <div class="figure-wrap">
+          <div class="figure-box">
+            <svg class="flow-diagram" viewBox="0 0 520 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de funcionamento">
+              <defs>
+                <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                  <path d="M0,0 L6,3 L0,6 Z" fill="#333" />
+                </marker>
+              </defs>
+              <rect x="10" y="20" width="110" height="44" rx="4" fill="#e3f2fd" stroke="#1565c0" stroke-width="1.5"/>
+              <text x="65" y="47" text-anchor="middle" font-size="11" font-family="Arial">Estudante</text>
+              <rect x="150" y="20" width="120" height="44" rx="4" fill="#e8f5e9" stroke="#2e7d32" stroke-width="1.5"/>
+              <text x="210" y="40" text-anchor="middle" font-size="10" font-family="Arial">Next.js</text>
+              <text x="210" y="54" text-anchor="middle" font-size="9" font-family="Arial">(interface)</text>
+              <rect x="300" y="20" width="100" height="44" rx="4" fill="#fff3e0" stroke="#ef6c00" stroke-width="1.5"/>
+              <text x="350" y="47" text-anchor="middle" font-size="10" font-family="Arial">API / lógica</text>
+              <rect x="420" y="20" width="90" height="44" rx="4" fill="#fce4ec" stroke="#c2185b" stroke-width="1.5"/>
+              <text x="465" y="40" text-anchor="middle" font-size="10" font-family="Arial">PostgreSQL</text>
+              <text x="465" y="54" text-anchor="middle" font-size="9" font-family="Arial">progresso</text>
+              <line x1="120" y1="42" x2="148" y2="42" stroke="#333" marker-end="url(#arrow)"/>
+              <line x1="270" y1="42" x2="298" y2="42" stroke="#333" marker-end="url(#arrow)"/>
+              <line x1="400" y1="42" x2="418" y2="42" stroke="#333" marker-end="url(#arrow)"/>
+              <rect x="60" y="100" width="400" height="90" rx="6" fill="#f5f5f5" stroke="#9e9e9e"/>
+              <text x="260" y="125" text-anchor="middle" font-size="11" font-weight="bold" font-family="Arial">Ciclo gamificado</text>
+              <text x="260" y="145" text-anchor="middle" font-size="10" font-family="Arial">Trilha → Lição → XP / nível → Ranking → Ofensiva diária</text>
+              <text x="260" y="168" text-anchor="middle" font-size="9" font-family="Arial">Feedback imediato e reforço da prática (Escola Marilda — piloto)</text>
+            </svg>
+          </div>
+          <p class="caption">
+            <strong>Figura 1</strong> — Diagrama de funcionamento da plataforma Aprenda Aqui e ciclo de gamificação.<br />
+            <span class="fonte">Fonte: Autores (2026).</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="col col-right">
+        <div class="screenshot-placeholder" id="area-print">
+          <span>INSIRA AQUI A PRINT DA PLATAFORMA</span>
+          <small>Substitua este quadro pela captura de tela do ambiente<br />(dashboard, trilha ou tela inicial).</small>
+        </div>
+
+        <section>
+          <h2>Discussão</h2>
+          <p>
+            Os achados do piloto dialogam com revisões sistemáticas que destacam XP, feedback imediato e desafios graduais
+            como elementos centrais em ambientes gamificados para programação. A escolha por Next.js e PostgreSQL atende
+            requisitos de manutenção, segurança dos dados educacionais e evolução modular do conteúdo.
+          </p>
+          <p>
+            Limitações incluem o caráter preliminar da amostra na Escola Marilda e a necessidade de instrumentos validados
+            (questionários de usabilidade e aprendizagem) em ciclos seguintes. Ainda assim, a combinação de trilhas
+            estruturadas com mecânicas de jogo reduz a barreira de entrada para iniciantes, coerente com práticas
+            recomendadas na literatura da RBIE/SBIE.
+          </p>
+
+          <table>
+            <caption>Tabela 1 — Indicadores observados no teste piloto (Escola Marilda)</caption>
+            <thead>
+              <tr>
+                <th>Indicador</th>
+                <th>Observação preliminar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Conclusão de lições iniciais</td>
+                <td>Maioria dos grupos concluiu ao menos uma lição na sessão</td>
+              </tr>
+              <tr>
+                <td>Engajamento (XP / ranking)</td>
+                <td>Estímulo relatado; competição saudável entre pares</td>
+              </tr>
+              <tr>
+                <td>Usabilidade</td>
+                <td>Navegação intuitiva; poucos erros de cadastro/login</td>
+              </tr>
+              <tr>
+                <td>Medição quantitativa</td>
+                <td>Em consolidação — preencher com dados finais do piloto</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>Conclusões</h2>
+          <p>
+            O <em>Aprenda Aqui</em> materializa uma proposta gamificada e tecnicamente robusta para o ensino de
+            programação, com validação inicial em contexto escolar real. Como continuidade, pretende-se expandir o piloto,
+            instrumentar avaliações de aprendizagem e integrar relatórios pedagógicos para gestores da Escola Marilda e
+            da UNIVAP. A plataforma permanece disponível para demonstração e evolução como produto de iniciação científica
+            em Engenharia da Computação.
+          </p>
+        </section>
+
+        <section>
+          <h2>Referências</h2>
+          <ol class="refs">
+            <li>
+              CASTRO, M. B. O.; SANTOS, V. A. Gamificação como recurso para aprimorar o ensino de lógica de programação em cursos de computação no ensino superior: uma revisão sistemática. <em>RENOTE</em>, Porto Alegre, v. 21, n. 2, p. 307–318, 2023.
+            </li>
+            <li>
+              DE SOUSA, K. H. F.; MELO, L. B. Uma revisão sistemática do uso da gamificação no ensino de programação. <em>Anais do SBIE</em>, 2021, p. 440–450.
+            </li>
+            <li>
+              DINIZ, P.; MERLIN, B.; PORTELA, C. Estratégias de Gamificação Personalizadas no Ensino de Programação: Uma Revisão Sistemática da Literatura. <em>Anais do SBIE</em>, 2024, p. 774–790.
+            </li>
+            <li>
+              STEINMETZ, G. et al. Gamificando o Ensino de Programação de Computadores: um Mapeamento Sistemático. <em>Anais do SBIE</em>, 2021, p. 1286–1296.
+            </li>
+            <li>
+              AHMAD, A. et al. The Impact of Gamification on Learning Outcomes of Computer Science Majors. <em>ACM Transactions on Computing Education</em>, v. 20, n. 2, 2020.
+            </li>
+            <li>
+              DETERDING, S. et al. From game design elements to gamefulness: defining gamification. <em>Proceedings of MindTrek</em>, 2011, p. 9–15.
+            </li>
+          </ol>
+        </section>
+      </div>
+    </div>
+  </article>
+</body>
+</html>
