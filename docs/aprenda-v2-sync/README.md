@@ -1,26 +1,23 @@
-# Patch Aprenda-Aqui-v2 — seed completo + login
+# Patch Aprenda-Aqui-v2
 
-Copie estes arquivos para o repositório **MateusBittenca/Aprenda-Aqui-v2**:
+Copie os arquivos desta pasta para o repositório **MateusBittenca/Aprenda-Aqui-v2** nos mesmos caminhos.
 
-| Origem (esta pasta) | Destino no repo v2 |
-|---------------------|-------------------|
+## 1. Seed + login (trilhas)
+
+| Origem | Destino no repo v2 |
+|--------|--------------------|
 | `packages/database/prisma/seed-tracks-data.ts` | `packages/database/prisma/seed-tracks-data.ts` |
 | `packages/database/prisma/seed.ts` | `packages/database/prisma/seed.ts` |
 | `apps/web/app/(auth)/login/page.tsx` | `apps/web/app/(auth)/login/page.tsx` |
 
-## O que mudou
+- **10 trilhas** (115 lições): HTML (25) + CSS, JS, Python, Lógica, Git, SQL, React, TypeScript, APIs (10 cada)
+- Texto demo removido da tela de login
+- Admin: `aprenda@adm.com.br` / `123456` (TEACHER)
 
-- **10 trilhas** (115 lições no total): HTML (25), CSS, JS, Python, Lógica, Git, SQL, React, TypeScript, APIs (10 cada).
-- Lições alternando **QUIZ** e **CODE**.
-- Texto demo removido da tela de login.
-- Admin no seed: `aprenda@adm.com.br` / `123456` (TEACHER).
+`pnpm db:seed` **apaga todos os dados**. Use só em banco vazio/dev.
 
-## Rodar seed (apaga todos os dados!)
+## 2. Avatar 3D + acessórios na loja de gemas
 
-```bash
-pnpm db:seed
-```
+Instruções completas: **[AVATAR.md](./AVATAR.md)**
 
-## Deploy
-
-Após merge, faça redeploy no Railway e rode o seed no serviço com acesso ao MySQL.
+Resumo: cada usuário ganha um personagem 3D em `/avatar`, compra chapéus/óculos/capas/mascotes com gemas e equipa no estúdio. A compra usa o inventário já existente (`user_inventory_items`) e debita `users.gems`.

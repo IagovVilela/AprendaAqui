@@ -2,6 +2,7 @@ import { PrismaClient, ActivityType, NotificationType, UserRole } from "@prisma/
 import bcrypt from "bcryptjs";
 import { gemsForXp } from "../src/gems";
 import { syncLevelRewardsForUser } from "../src/sync-level-rewards";
+import { DEFAULT_AVATAR_CONFIG } from "../src/avatar-config";
 import { buildTracksSeedData } from "./seed-tracks-data";
 
 const prisma = new PrismaClient();
@@ -133,13 +134,32 @@ async function main() {
 
   const demoLevelSync = await syncLevelRewardsForUser(prisma, demoUser.id, demoXpTotal);
 
+  await prisma.userInventoryItem.createMany({
+    data: [
+      { userId: demoUser.id, itemKey: "hat-crown" },
+      { userId: demoUser.id, itemKey: "cape-green" },
+      { userId: demoUser.id, itemKey: "pet-cat" },
+      { userId: demoUser.id, itemKey: "palette-neon" },
+    ],
+  });
+
   await prisma.user.update({
     where: { id: demoUser.id },
     data: {
       xpTotal: demoXpTotal,
-      gems: demoGemsTotal + demoLevelSync.totalGemsFromLevels,
+      gems: demoGemsTotal + demoLevelSync.totalGemsFromLevels + 400,
       activeTitleKey: demoLevelSync.activeTitleKey,
       lastCelebratedLevel: demoLevelSync.level,
+      avatarConfig: {
+        ...DEFAULT_AVATAR_CONFIG,
+        hairColor: "#58CC02",
+        equipped: {
+          hair: "hair-short",
+          hat: "hat-crown",
+          cape: "cape-green",
+          pet: "pet-cat",
+        },
+      },
     },
   });
 

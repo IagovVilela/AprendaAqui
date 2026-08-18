@@ -1,0 +1,16 @@
+{
+  "note": "Adicione estas dependências em apps/web/package.json e rode pnpm install na raiz.",
+  "dependencies": {
+    "three": "^0.175.0",
+    "@react-three/fiber": "^9.1.2",
+    "@react-three/drei": "^10.0.6"
+  },
+  "devDependencies": {
+    "@types/three": "^0.175.0"
+  },
+  "react18Fallback": {
+    "comment": "Se o projeto ainda estiver em React 18, use fiber 8 e drei 9.",
+    "@react-three/fiber": "^8.17.14",
+    "@react-three/drei": "^9.121.4"
+  }
+}

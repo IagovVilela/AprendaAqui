@@ -1,0 +1,8 @@
+// Cole este campo no model User de packages/database/prisma/schema.prisma
+// (junto dos demais campos do usuário, antes das relações).
+
+model User {
+  // ...campos existentes...
+  avatarConfig Json? @map("avatar_config")
+  // ...relações existentes, incluindo inventory UserInventoryItem[]...
+}
