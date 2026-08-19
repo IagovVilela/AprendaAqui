@@ -1,5 +1,7 @@
 import { LessonType } from "@prisma/client";
 
+/** Catálogo para inserção aditiva (por slug). Nunca usar para apagar o seed existente. */
+
 export type LessonSeed = {
   title: string;
   type: LessonType;

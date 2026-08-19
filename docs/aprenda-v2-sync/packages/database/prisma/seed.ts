@@ -1,67 +1,38 @@
-import { PrismaClient, ActivityType, NotificationType, UserRole } from "@prisma/client";
+import { PrismaClient, UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { gemsForXp } from "../src/gems";
-import { syncLevelRewardsForUser } from "../src/sync-level-rewards";
-import { DEFAULT_AVATAR_CONFIG } from "../src/avatar-config";
 import { buildTracksSeedData } from "./seed-tracks-data";
 
 const prisma = new PrismaClient();
 
-function getWeekStart(date = new Date()): Date {
-  const d = new Date(date);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  d.setDate(diff);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
+const ADMIN_EMAIL = "aprenda@adm.com.br";
 
-async function main() {
-  await prisma.notification.deleteMany();
-  await prisma.activityEvent.deleteMany();
-  await prisma.userChestClaim.deleteMany();
-  await prisma.userTitleUnlock.deleteMany();
-  await prisma.trackChest.deleteMany();
-  await prisma.friendship.deleteMany();
-  await prisma.userProgress.deleteMany();
-  await prisma.leaderboardEntry.deleteMany();
-  await prisma.lesson.deleteMany();
-  await prisma.unit.deleteMany();
-  await prisma.track.deleteMany();
-  await prisma.session.deleteMany();
-  await prisma.account.deleteMany();
-  await prisma.user.deleteMany();
+/**
+ * Seed aditivo. Nunca apaga usuários, progresso, gemas, inventário
+ * nem trilhas/lições que já existem no banco.
+ *
+ * - Trilha com o mesmo slug: preservada (seed atual permanece).
+ * - Trilha nova: inserida com unidades, lições e baús.
+ * - Admin: criado só se o e-mail ainda não existir (senha atual não muda).
+ */
+async function ensureTracks(): Promise<void> {
+  const catalog = buildTracksSeedData();
+  let created = 0;
+  let skipped = 0;
 
-  const passwordHash = await bcrypt.hash("demo123", 10);
-  const adminPasswordHash = await bcrypt.hash("123456", 10);
-
-  const demoUser = await prisma.user.create({
-    data: {
-      name: "Alex Dev",
-      email: "demo@aprendaqui.com.br",
-      passwordHash,
-      xpTotal: 0,
-      streakAtual: 3,
-      ultimaAtividade: new Date(),
-      role: UserRole.STUDENT,
-    },
-  });
-
-  await prisma.user.create({
-    data: {
-      name: "Aprenda@adm",
-      email: "aprenda@adm.com.br",
-      passwordHash: adminPasswordHash,
-      role: UserRole.TEACHER,
-    },
-  });
-
-  const tracksData = buildTracksSeedData();
-
-  const allLessons: { id: string; xpReward: number; gemsReward: number }[] = [];
-
-  for (const trackData of tracksData) {
+  for (const trackData of catalog) {
     const { units, ...trackFields } = trackData;
+    const existing = await prisma.track.findFirst({
+      where: { slug: trackFields.slug },
+      select: { id: true, title: true, slug: true },
+    });
+
+    if (existing) {
+      skipped += 1;
+      console.log(`[ensure] trilha "${existing.slug}" já existe — conteúdo preservado`);
+      continue;
+    }
+
     const track = await prisma.track.create({ data: trackFields });
 
     for (const unitData of units) {
@@ -84,11 +55,6 @@ async function main() {
           },
         });
         lastLessonInUnit = lesson;
-        allLessons.push({
-          id: lesson.id,
-          xpReward: lesson.xpReward,
-          gemsReward: lesson.gemsReward,
-        });
       }
 
       if (lastLessonInUnit) {
@@ -106,264 +72,55 @@ async function main() {
         });
       }
     }
+
+    created += 1;
+    console.log(`[ensure] trilha "${track.slug}" criada`);
   }
 
-  const weekStart = getWeekStart();
-  const completedLessons = allLessons.slice(0, 8);
-  let demoXpTotal = 0;
-  let demoGemsTotal = 0;
+  console.log(`[ensure] trilhas criadas: ${created}; trilhas preservadas: ${skipped}`);
+}
 
-  for (let i = 0; i < completedLessons.length; i++) {
-    const lesson = completedLessons[i];
-    demoXpTotal += lesson.xpReward;
-    demoGemsTotal += lesson.gemsReward;
+async function ensureAdmin(): Promise<void> {
+  const existing = await prisma.user.findUnique({
+    where: { email: ADMIN_EMAIL },
+    select: { id: true, email: true },
+  });
 
-    const completedAt = new Date(weekStart);
-    completedAt.setDate(completedAt.getDate() + (i % 7));
-    completedAt.setHours(10 + i, 0, 0, 0);
-
-    await prisma.userProgress.create({
-      data: {
-        userId: demoUser.id,
-        lessonId: lesson.id,
-        xpEarned: lesson.xpReward,
-        completedAt,
-      },
-    });
+  if (existing) {
+    console.log(`[ensure] admin ${ADMIN_EMAIL} já existe — senha e dados preservados`);
+    return;
   }
 
-  const demoLevelSync = await syncLevelRewardsForUser(prisma, demoUser.id, demoXpTotal);
-
-  await prisma.userInventoryItem.createMany({
-    data: [
-      { userId: demoUser.id, itemKey: "hat-crown" },
-      { userId: demoUser.id, itemKey: "cape-green" },
-      { userId: demoUser.id, itemKey: "pet-cat" },
-      { userId: demoUser.id, itemKey: "palette-neon" },
-    ],
-  });
-
-  await prisma.user.update({
-    where: { id: demoUser.id },
+  const passwordHash = await bcrypt.hash("123456", 10);
+  await prisma.user.create({
     data: {
-      xpTotal: demoXpTotal,
-      gems: demoGemsTotal + demoLevelSync.totalGemsFromLevels + 400,
-      activeTitleKey: demoLevelSync.activeTitleKey,
-      lastCelebratedLevel: demoLevelSync.level,
-      avatarConfig: {
-        ...DEFAULT_AVATAR_CONFIG,
-        hairColor: "#58CC02",
-        equipped: {
-          hair: "hair-short",
-          hat: "hat-crown",
-          cape: "cape-green",
-          pet: "pet-cat",
-        },
-      },
-    },
-  });
-
-  const now = new Date();
-  const fiveMinAgo = new Date(now.getTime() - 5 * 60 * 1000);
-  const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
-
-  const maria = await prisma.user.create({
-    data: {
-      name: "Maria Silva",
-      email: "maria@aprendaqui.com.br",
+      name: "Aprenda@adm",
+      email: ADMIN_EMAIL,
       passwordHash,
-      xpTotal: 45,
-      streakAtual: 5,
-      ultimaAtividade: fiveMinAgo,
+      role: UserRole.TEACHER,
     },
   });
+  console.log(`[ensure] admin ${ADMIN_EMAIL} criado`);
+}
 
-  const joao = await prisma.user.create({
-    data: {
-      name: "João Costa",
-      email: "joao@aprendaqui.com.br",
-      passwordHash,
-      xpTotal: 30,
-      streakAtual: 2,
-      ultimaAtividade: twoHoursAgo,
-    },
-  });
-
-  const ana = await prisma.user.create({
-    data: {
-      name: "Ana Lima",
-      email: "ana@aprendaqui.com.br",
-      passwordHash,
-      xpTotal: 20,
-      streakAtual: 1,
-      ultimaAtividade: now,
-    },
-  });
-
-  const carlos = await prisma.user.create({
-    data: {
-      name: "Carlos Mendes",
-      email: "carlos@aprendaqui.com.br",
-      passwordHash,
-      xpTotal: 15,
-      streakAtual: 0,
-      ultimaAtividade: twoHoursAgo,
-    },
-  });
-
-  for (const [user, lessonCount] of [
-    [maria, 5],
-    [joao, 4],
-    [ana, 3],
-    [carlos, 2],
-  ] as const) {
-    let xp = 0;
-    for (let i = 0; i < lessonCount; i++) {
-      const lesson = allLessons[i];
-      xp += lesson.xpReward;
-      await prisma.userProgress.create({
-        data: {
-          userId: user.id,
-          lessonId: lesson.id,
-          xpEarned: lesson.xpReward,
-          completedAt: new Date(weekStart.getTime() + i * 86400000),
-        },
-      });
-    }
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { xpTotal: xp },
-    });
-
-    const sync = await syncLevelRewardsForUser(prisma, user.id, xp);
-    const current = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: { gems: true },
-    });
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        gems: (current?.gems ?? 0) + sync.totalGemsFromLevels,
-        activeTitleKey: sync.activeTitleKey,
-        lastCelebratedLevel: sync.level,
-      },
-    });
+async function assertNotDestructive(): Promise<void> {
+  if (process.env.ALLOW_DESTRUCTIVE_SEED === "true") {
+    throw new Error(
+      "ALLOW_DESTRUCTIVE_SEED foi recusado: este projeto não apaga dados nem o seed existente."
+    );
   }
+}
 
-  await prisma.friendship.create({
-    data: {
-      requesterId: maria.id,
-      addresseeId: demoUser.id,
-      status: "ACCEPTED",
-    },
-  });
-
-  await prisma.friendship.create({
-    data: {
-      requesterId: demoUser.id,
-      addresseeId: joao.id,
-      status: "ACCEPTED",
-    },
-  });
-
-  const pendingAna = await prisma.friendship.create({
-    data: {
-      requesterId: ana.id,
-      addresseeId: demoUser.id,
-      status: "PENDING",
-    },
-  });
-
-  const pendingCarlos = await prisma.friendship.create({
-    data: {
-      requesterId: carlos.id,
-      addresseeId: demoUser.id,
-      status: "PENDING",
-    },
-  });
-
-  const firstLesson = completedLessons[0];
-  const firstLessonFull = await prisma.lesson.findUnique({
-    where: { id: firstLesson.id },
-    include: { track: { select: { title: true } } },
-  });
-
-  if (firstLessonFull) {
-    const activityMeta = {
-      lessonId: firstLessonFull.id,
-      lessonTitle: firstLessonFull.title,
-      trackTitle: firstLessonFull.track.title,
-      xpEarned: firstLessonFull.xpReward,
-    };
-
-    await prisma.activityEvent.createMany({
-      data: [
-        {
-          userId: maria.id,
-          type: ActivityType.LESSON_COMPLETED,
-          metadata: activityMeta,
-          createdAt: new Date(now.getTime() - 30 * 60 * 1000),
-        },
-        {
-          userId: joao.id,
-          type: ActivityType.LESSON_COMPLETED,
-          metadata: activityMeta,
-          createdAt: new Date(now.getTime() - 2 * 60 * 60 * 1000),
-        },
-        {
-          userId: demoUser.id,
-          type: ActivityType.LESSON_COMPLETED,
-          metadata: activityMeta,
-          createdAt: new Date(now.getTime() - 4 * 60 * 60 * 1000),
-        },
-      ],
-    });
-  }
-
-  await prisma.notification.createMany({
-    data: [
-      {
-        userId: demoUser.id,
-        actorId: ana.id,
-        type: NotificationType.FRIEND_REQUEST,
-        read: false,
-        metadata: {
-          friendshipId: pendingAna.id,
-          actorName: ana.name,
-        },
-      },
-      {
-        userId: demoUser.id,
-        actorId: carlos.id,
-        type: NotificationType.FRIEND_REQUEST,
-        read: false,
-        metadata: {
-          friendshipId: pendingCarlos.id,
-          actorName: carlos.name,
-        },
-      },
-      {
-        userId: demoUser.id,
-        actorId: maria.id,
-        type: NotificationType.FRIEND_ACTIVITY,
-        read: true,
-        metadata: {
-          actorName: maria.name,
-          lessonTitle: firstLessonFull?.title ?? "O que é HTML?",
-          trackTitle: firstLessonFull?.track.title ?? "HTML",
-        },
-        createdAt: new Date(now.getTime() - 45 * 60 * 1000),
-      },
-    ],
-  });
-
-  console.log("Seed concluído!");
-  console.log("Admin: aprenda@adm.com.br / 123456");
+async function main() {
+  await assertNotDestructive();
+  await ensureTracks();
+  await ensureAdmin();
+  console.log("[ensure] concluído sem apagar nenhum registro");
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
+  .catch((error) => {
+    console.error(error);
     process.exit(1);
   })
   .finally(async () => {

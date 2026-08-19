@@ -39,14 +39,16 @@ avatarConfig Json? @map("avatar_config")
 
 `packages/database/prisma/migrations/20260818120000_add_avatar_config/migration.sql`
 
-3. No servidor:
+3. No servidor (somente migration — **não rode seed**):
 
 ```bash
 pnpm db:migrate:deploy
 pnpm --filter database generate
 ```
 
-Não rode `pnpm db:seed` só por causa do avatar — o seed **apaga todos os dados**. O seed atualizado só é necessário em ambiente vazio/dev. Em produção, a migration basta: cada usuário começa com o avatar padrão.
+A coluna nova é anulável: ninguém perde conta, progresso, gemas ou trilhas. Usuários atuais ficam com `avatar_config = NULL` e o app usa o personagem padrão.
+
+O `seed.ts` deste patch também é aditivo (não apaga dados). **Não coloque `pnpm db:seed` no start do Railway.** Ver [DATA-INTEGRITY.md](./DATA-INTEGRITY.md).
 
 ### 2. Dependências 3D (`apps/web`)
 
@@ -107,7 +109,7 @@ packages/database/src/avatar-config.ts
 packages/database/src/avatar-items.ts
 packages/database/prisma/schema-avatar.snippet.prisma
 packages/database/prisma/migrations/20260818120000_add_avatar_config/migration.sql
-packages/database/prisma/seed.ts          ← demo ganha coroa, capa, gato e paleta neon
+packages/database/prisma/seed.ts          ← aditivo: não apaga seed/usuários existentes
 apps/web/lib/avatar-config.ts
 apps/web/lib/avatar-items.ts
 apps/web/components/avatar/*

@@ -1,5 +1,6 @@
-// Cole este campo no model User de packages/database/prisma/schema.prisma
-// (junto dos demais campos do usuário, antes das relações).
+// Cole este campo no model User. É anulável de propósito:
+// usuários atuais ficam com NULL e o app usa o avatar padrão.
+// Não remova nem altere colunas existentes.
 
 model User {
   // ...campos existentes...
