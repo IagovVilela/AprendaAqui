@@ -38,6 +38,17 @@ Instruções e decisões de projeto: **[TEAMS-BATTLES.md](./TEAMS-BATTLES.md)**
 
 Migration só **cria tabelas novas** (`teams`, `team_members`, `team_wars`, `quiz_*`, ...).
 
+## 4. Moderação de nomes ofensivos
+
+Instruções: **[MODERATION.md](./MODERATION.md)**
+
+- Filtro no cadastro, na troca de nome e no nome/descrição de equipe
+- Resistente a leetspeak (`c4r4lh0`), letras repetidas (`caraaaalho`) e letras soltas (`C U`)
+- Dois níveis: `BLOCK` barra; `REVIEW` deixa passar e manda para o professor (evita barrar sobrenome real, como Pinto ou Cunha)
+- Painel em `/professor/moderacao`: fila de revisão, denúncias, renome forçado e termos editáveis sem deploy
+
+Migration cria só `moderation_terms` e `moderation_events`. Nenhum usuário existente é alterado.
+
 ## Ordem de aplicação
 
 ```bash
@@ -53,6 +64,8 @@ pnpm --filter api add socket.io
 
 # 4. popular o banco de perguntas das batalhas (aditivo, pode repetir)
 pnpm --filter database exec tsx scripts/sync-question-bank.ts
+
+# 5. moderação: aplicar o snippet em apps/web/app/api/auth/register/route.ts
 ```
 
 Nenhum desses passos apaga dados.
