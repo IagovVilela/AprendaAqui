@@ -26,6 +26,8 @@ pnpm db:migrate:deploy && pnpm --filter api start
 
 **Não acrescente `db:seed` nesse comando.**
 
+O seed **não viaja no deploy**. Alunos, gemas e trilhas já estão no MySQL. O deploy só envia código. Em produção o `seed.ts` **não executa** (sai imediatamente), a menos que alguém defina `RUN_ENSURE_CONTENT=true` de propósito.
+
 ## Seed (`pnpm db:seed`)
 
 O `packages/database/prisma/seed.ts` deste patch é **aditivo**:

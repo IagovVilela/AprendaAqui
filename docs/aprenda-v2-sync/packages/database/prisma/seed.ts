@@ -103,16 +103,33 @@ async function ensureAdmin(): Promise<void> {
   console.log(`[ensure] admin ${ADMIN_EMAIL} criado`);
 }
 
-async function assertNotDestructive(): Promise<void> {
+function isProduction(): boolean {
+  return process.env.NODE_ENV === "production" || process.env.RAILWAY_ENVIRONMENT === "production";
+}
+
+async function assertSafeToRun(): Promise<boolean> {
   if (process.env.ALLOW_DESTRUCTIVE_SEED === "true") {
     throw new Error(
       "ALLOW_DESTRUCTIVE_SEED foi recusado: este projeto não apaga dados nem o seed existente."
     );
   }
+
+  if (isProduction() && process.env.RUN_ENSURE_CONTENT !== "true") {
+    console.log(
+      "[ensure] produção: seed ignorado. Dados e trilhas atuais permanecem no MySQL. Deploy só aplica migrations."
+    );
+    return false;
+  }
+
+  return true;
 }
 
 async function main() {
-  await assertNotDestructive();
+  const shouldRun = await assertSafeToRun();
+  if (!shouldRun) {
+    return;
+  }
+
   await ensureTracks();
   await ensureAdmin();
   console.log("[ensure] concluído sem apagar nenhum registro");
