@@ -1,0 +1,28 @@
+---
+description: Nunca apagar dados de produção nem o seed já existente. Deploy só com migration aditiva.
+alwaysApply: true
+---
+
+# Integridade dos dados (Aprenda Aqui)
+
+O sistema em produção já tem usuários, progresso, gemas, inventário e o seed atual de trilhas/lições. **Nada disso pode ser apagado.**
+
+## Obrigatório
+
+- Deploy no Railway: **somente** `prisma migrate deploy` (ou `pnpm db:migrate:deploy`). **Não** coloque seed no start do serviço.
+- Em produção o seed **não roda** (`NODE_ENV=production` / Railway), salvo `RUN_ENSURE_CONTENT=true`.
+- `pnpm db:seed` fora de produção só é permitido se o script for **aditivo**. Proibido `migrate reset`, `db push --force-reset` e `DELETE`/`TRUNCATE` em massa.
+- Migrations: só **adicionar** (coluna nova anulável, tabela nova). Proibido `DROP TABLE`, `DROP COLUMN`, `TRUNCATE`, ou `UPDATE` que zere progresso/gemas/seed.
+- Scripts de conteúdo: só **inserir o que ainda não existe** (por slug/email/chave). Se a trilha/lição/usuário já está no banco, **não alterar e não recriar**.
+- Proibido `deleteMany()`, wipe de tabelas e equivalentes em seed, sync ou start de serviço.
+
+## Proibido em qualquer ambiente com dados reais
+
+- Substituir `seed.ts` por um arquivo que começa com `deleteMany`
+- Rodar seed destrutivo “só para atualizar as trilhas”
+- Recriar o admin/aluno se o e-mail já existe (não resetar senha)
+- Apagar lições para recolocar o catálogo novo
+
+## Como incluir conteúdo novo
+
+Use o seed **aditivo** (`packages/database/prisma/seed.ts` no patch v2): cria trilhas cujo `slug` ainda não existe e ignora as que já estão lá. O HTML (e o restante do seed atual) permanece intacto.
