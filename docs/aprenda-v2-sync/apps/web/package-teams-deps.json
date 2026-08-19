@@ -1,0 +1,20 @@
+{
+  "note": "apps/web: cliente WebSocket da sala de quiz. Rode na raiz: pnpm --filter web add socket.io-client",
+  "dependencies": {
+    "socket.io-client": "^4.8.1"
+  },
+  "envVars": {
+    "NEXT_PUBLIC_REALTIME_URL": "https://api-production-67b4.up.railway.app"
+  },
+  "apiService": {
+    "note": "apps/api: servidor WebSocket. pnpm --filter api add socket.io",
+    "dependencies": {
+      "socket.io": "^4.8.1",
+      "next-auth": "^4.24.11"
+    },
+    "envVars": {
+      "WEB_ORIGIN": "https://aprendaaqui.up.railway.app",
+      "NEXTAUTH_SECRET": "mesmo valor já usado pelo web"
+    }
+  }
+}
