@@ -1,0 +1,305 @@
+// Cole estes models e enums no fim de packages/database/prisma/schema.prisma.
+// Tudo é novo: nenhum model existente é alterado.
+//
+// No model User existente, adicione APENAS estas relações (nada é removido):
+//
+//   teamMembership   TeamMember?
+//   ownedTeams       Team[]               @relation("TeamOwner")
+//   teamInvites      TeamInvite[]
+//   teamJoinRequests TeamJoinRequest[]
+//   quizParticipants QuizParticipant[]
+//   warParticipants  TeamWarParticipant[]
+//
+// No model Track existente, adicione:
+//
+//   quizQuestions QuizQuestion[]
+//
+// No model Lesson existente, adicione:
+//
+//   quizQuestions QuizQuestion[]
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum TeamJoinPolicy {
+  INVITE_ONLY
+  REQUEST
+}
+
+enum TeamJoinRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum QuizDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum QuizQuestionSource {
+  LESSON
+  TEACHER
+  SEED
+}
+
+enum QuizSessionMode {
+  TEAM_INTERNAL
+  TEAM_WAR
+}
+
+enum QuizSessionStatus {
+  LOBBY
+  QUESTION
+  INTERMISSION
+  FINISHED
+  CANCELLED
+}
+
+enum TeamWarStatus {
+  PREPARATION
+  BATTLE
+  FINISHED
+  CANCELLED
+}
+
+model Team {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  slug        String         @unique
+  description String?        @db.VarChar(280)
+  emblemSeed  String         @map("emblem_seed")
+  emblemColor String         @default("#58CC02") @map("emblem_color")
+  joinPolicy  TeamJoinPolicy @default(REQUEST) @map("join_policy")
+  maxMembers  Int            @default(25) @map("max_members")
+  xpTotal     Int            @default(0) @map("xp_total")
+  warPoints   Int            @default(0) @map("war_points")
+  warsWon     Int            @default(0) @map("wars_won")
+  warsLost    Int            @default(0) @map("wars_lost")
+  ownerId     String         @map("owner_id")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  owner         User              @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members       TeamMember[]
+  invites       TeamInvite[]
+  joinRequests  TeamJoinRequest[]
+  quizSessions  QuizSession[]
+  warsStarted   TeamWar[]         @relation("WarChallenger")
+  warsReceived  TeamWar[]         @relation("WarOpponent")
+
+  @@index([warPoints])
+  @@index([ownerId])
+  @@map("teams")
+}
+
+model TeamMember {
+  id           String   @id @default(cuid())
+  teamId       String   @map("team_id")
+  userId       String   @unique @map("user_id")
+  role         TeamRole @default(MEMBER)
+  seasonPoints Int      @default(0) @map("season_points")
+  weekPoints   Int      @default(0) @map("week_points")
+  joinedAt     DateTime @default(now()) @map("joined_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([teamId, seasonPoints])
+  @@map("team_members")
+}
+
+model TeamInvite {
+  id          String    @id @default(cuid())
+  teamId      String    @map("team_id")
+  code        String    @unique @db.VarChar(16)
+  createdById String    @map("created_by_id")
+  maxUses     Int?      @map("max_uses")
+  uses        Int       @default(0)
+  expiresAt   DateTime? @map("expires_at")
+  revokedAt   DateTime? @map("revoked_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  team      Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  createdBy User @relation(fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@map("team_invites")
+}
+
+model TeamJoinRequest {
+  id           String                @id @default(cuid())
+  teamId       String                @map("team_id")
+  userId       String                @map("user_id")
+  status       TeamJoinRequestStatus @default(PENDING)
+  decidedById  String?               @map("decided_by_id")
+  decidedAt    DateTime?             @map("decided_at")
+  createdAt    DateTime              @default(now()) @map("created_at")
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+  @@index([teamId, status])
+  @@map("team_join_requests")
+}
+
+model QuizQuestion {
+  id           String             @id @default(cuid())
+  trackId      String?            @map("track_id")
+  lessonId     String?            @map("lesson_id")
+  topic        String
+  difficulty   QuizDifficulty     @default(MEDIUM)
+  prompt       String             @db.Text
+  options      Json
+  correctIndex Int                @map("correct_index")
+  timeLimitSec Int                @default(20) @map("time_limit_sec")
+  source       QuizQuestionSource @default(LESSON)
+  active       Boolean            @default(true)
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+
+  track            Track?                @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  lesson           Lesson?               @relation(fields: [lessonId], references: [id], onDelete: SetNull)
+  sessionQuestions QuizSessionQuestion[]
+  answers          QuizAnswer[]
+
+  @@index([trackId, active])
+  @@index([lessonId])
+  @@index([difficulty])
+  @@map("quiz_questions")
+}
+
+model QuizSession {
+  id                   String            @id @default(cuid())
+  code                 String            @unique @db.VarChar(8)
+  mode                 QuizSessionMode
+  status               QuizSessionStatus @default(LOBBY)
+  hostUserId           String?           @map("host_user_id")
+  teamId               String?           @map("team_id")
+  warId                String?           @unique @map("war_id")
+  trackId              String?           @map("track_id")
+  currentQuestionIndex Int               @default(0) @map("current_question_index")
+  questionStartedAt    DateTime?         @map("question_started_at")
+  questionEndsAt       DateTime?         @map("question_ends_at")
+  createdAt            DateTime          @default(now()) @map("created_at")
+  finishedAt           DateTime?         @map("finished_at")
+
+  team         Team?                 @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  war          TeamWar?              @relation(fields: [warId], references: [id], onDelete: Cascade)
+  questions    QuizSessionQuestion[]
+  participants QuizParticipant[]
+  answers      QuizAnswer[]
+
+  @@index([teamId])
+  @@index([status])
+  @@map("quiz_sessions")
+}
+
+model QuizSessionQuestion {
+  id           String @id @default(cuid())
+  sessionId    String @map("session_id")
+  questionId   String @map("question_id")
+  order        Int
+  timeLimitSec Int    @default(20) @map("time_limit_sec")
+
+  session  QuizSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, order])
+  @@index([questionId])
+  @@map("quiz_session_questions")
+}
+
+model QuizParticipant {
+  id            String   @id @default(cuid())
+  sessionId     String   @map("session_id")
+  userId        String   @map("user_id")
+  teamId        String?  @map("team_id")
+  score         Int      @default(0)
+  correctCount  Int      @default(0) @map("correct_count")
+  answeredCount Int      @default(0) @map("answered_count")
+  optionSeed    Int      @map("option_seed")
+  connected     Boolean  @default(true)
+  lastSeenAt    DateTime @default(now()) @map("last_seen_at")
+  joinedAt      DateTime @default(now()) @map("joined_at")
+
+  session QuizSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers QuizAnswer[]
+
+  @@unique([sessionId, userId])
+  @@index([sessionId, score])
+  @@index([teamId])
+  @@map("quiz_participants")
+}
+
+model QuizAnswer {
+  id            String   @id @default(cuid())
+  sessionId     String   @map("session_id")
+  participantId String   @map("participant_id")
+  questionId    String   @map("question_id")
+  selectedIndex Int      @map("selected_index")
+  correct       Boolean
+  responseMs    Int      @map("response_ms")
+  points        Int
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  session     QuizSession     @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  participant QuizParticipant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  question    QuizQuestion    @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([participantId, questionId])
+  @@index([sessionId])
+  @@map("quiz_answers")
+}
+
+model TeamWar {
+  id                String        @id @default(cuid())
+  challengerTeamId  String        @map("challenger_team_id")
+  opponentTeamId    String        @map("opponent_team_id")
+  status            TeamWarStatus @default(PREPARATION)
+  trackId           String?       @map("track_id")
+  createdById       String        @map("created_by_id")
+  minParticipants   Int           @default(5) @map("min_participants")
+  prepEndsAt        DateTime      @map("prep_ends_at")
+  battleStartedAt   DateTime?     @map("battle_started_at")
+  challengerScore   Int?          @map("challenger_score")
+  opponentScore     Int?          @map("opponent_score")
+  winnerTeamId      String?       @map("winner_team_id")
+  createdAt         DateTime      @default(now()) @map("created_at")
+  finishedAt        DateTime?     @map("finished_at")
+
+  challengerTeam Team                 @relation("WarChallenger", fields: [challengerTeamId], references: [id], onDelete: Cascade)
+  opponentTeam   Team                 @relation("WarOpponent", fields: [opponentTeamId], references: [id], onDelete: Cascade)
+  participants   TeamWarParticipant[]
+  quizSession    QuizSession?
+
+  @@index([challengerTeamId])
+  @@index([opponentTeamId])
+  @@index([status])
+  @@map("team_wars")
+}
+
+model TeamWarParticipant {
+  id          String   @id @default(cuid())
+  warId       String   @map("war_id")
+  teamId      String   @map("team_id")
+  userId      String   @map("user_id")
+  confirmedAt DateTime @default(now()) @map("confirmed_at")
+  score       Int?
+
+  war  TeamWar @relation(fields: [warId], references: [id], onDelete: Cascade)
+  user User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([warId, userId])
+  @@index([warId, teamId])
+  @@map("team_war_participants")
+}
