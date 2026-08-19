@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "database";
 import { requireSessionUserId } from "@/lib/team-context";
+import { moderateName, moderationErrorResponse } from "@/lib/moderation-service";
 import {
   MAX_TEAM_MEMBERS,
   generateInviteCode,
@@ -58,6 +59,30 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Nome inválido" }, { status: 400 });
   }
 
+  const nameVerdict = await moderateName({
+    value: name,
+    field: "TEAM_NAME",
+    subjectUserId: auth.userId,
+  });
+
+  if (!nameVerdict.allowed) {
+    return NextResponse.json(moderationErrorResponse(nameVerdict), { status: 422 });
+  }
+
+  const description = body?.description?.trim().slice(0, 280) || null;
+
+  if (description) {
+    const descriptionVerdict = await moderateName({
+      value: description,
+      field: "TEAM_DESCRIPTION",
+      subjectUserId: auth.userId,
+    });
+
+    if (!descriptionVerdict.allowed) {
+      return NextResponse.json(moderationErrorResponse(descriptionVerdict), { status: 422 });
+    }
+  }
+
   const joinPolicy = body?.joinPolicy === "INVITE_ONLY" ? "INVITE_ONLY" : "REQUEST";
 
   const existingMembership = await prisma.teamMember.findUnique({
@@ -86,7 +111,7 @@ export async function POST(request: Request) {
       data: {
         name,
         slug,
-        description: body?.description?.trim().slice(0, 280) || null,
+        description,
         emblemSeed: slug,
         emblemColor: /^#[0-9a-fA-F]{6}$/.test(body?.emblemColor ?? "")
           ? (body?.emblemColor as string)
