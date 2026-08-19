@@ -1,0 +1,78 @@
+// Cole no fim de packages/database/prisma/schema.prisma. Tudo novo.
+//
+// No model User existente, adicione APENAS estas relações:
+//
+//   moderationEvents   ModerationEvent[] @relation("ModerationSubject")
+//   moderationReports  ModerationEvent[] @relation("ModerationReporter")
+
+enum ModerationSeverity {
+  BLOCK
+  REVIEW
+}
+
+enum ModerationCategory {
+  PROFANITY
+  SLUR
+  SEXUAL
+  IMPERSONATION
+  SPAM
+}
+
+enum ModerationMatchMode {
+  TOKEN
+  CONTAINS
+}
+
+enum ModerationEventKind {
+  NAME_BLOCKED
+  NAME_FLAGGED
+  FORCED_RENAME
+  USER_REPORT
+}
+
+enum ModerationField {
+  USER_NAME
+  TEAM_NAME
+  TEAM_DESCRIPTION
+}
+
+model ModerationTerm {
+  id          String              @id @default(cuid())
+  term        String              @unique @db.VarChar(64)
+  severity    ModerationSeverity  @default(BLOCK)
+  category    ModerationCategory  @default(PROFANITY)
+  matchMode   ModerationMatchMode @default(CONTAINS) @map("match_mode")
+  active      Boolean             @default(true)
+  createdById String?             @map("created_by_id")
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+
+  @@index([active])
+  @@map("moderation_terms")
+}
+
+model ModerationEvent {
+  id             String              @id @default(cuid())
+  kind           ModerationEventKind
+  field          ModerationField     @default(USER_NAME)
+  subjectUserId  String?             @map("subject_user_id")
+  teamId         String?             @map("team_id")
+  reporterId     String?             @map("reporter_id")
+  attemptedValue String              @map("attempted_value") @db.VarChar(280)
+  matchedTerm    String?             @map("matched_term") @db.VarChar(64)
+  severity       ModerationSeverity?
+  category       ModerationCategory?
+  note           String?             @db.VarChar(280)
+  resolved       Boolean             @default(false)
+  resolvedById   String?             @map("resolved_by_id")
+  resolvedAt     DateTime?           @map("resolved_at")
+  createdAt      DateTime            @default(now()) @map("created_at")
+
+  subjectUser User? @relation("ModerationSubject", fields: [subjectUserId], references: [id], onDelete: SetNull)
+  reporter    User? @relation("ModerationReporter", fields: [reporterId], references: [id], onDelete: SetNull)
+
+  @@index([resolved, createdAt])
+  @@index([subjectUserId])
+  @@index([kind])
+  @@map("moderation_events")
+}
